@@ -1,79 +1,89 @@
 // src/features/layout/components/Sidebar.tsx
-// Sidebar de navegación — adaptado de modelo1 para React Router + TypeScript
+// Sidebar completo — adaptado de modelo1, usando React Router NavLink
 
-import { NavLink, useLocation } from "react-router-dom";
-import { Icon } from "./Icon";
-import type { Role, ViewKey } from "../types";
+import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
+import { clsx } from "clsx";
+import { useApp } from "@/lib/store";
+import { api } from "@/lib/api";
+import { Icon } from "@/lib/ui";
+import type { Role } from "@/lib/types";
 
-// ---- Configuración de navegación ----
-interface NavItem {
-  key: ViewKey;
-  label: string;
-  icon: string;
-  path: string;
-  badge?: string;
-}
+const NAV_ITEMS = [
+  { to: "/dashboard",      label: "Dashboard",             icon: "space_dashboard" },
+  { to: "/directorio",     label: "Directorio Unidades",   icon: "domain" },
+  { to: "/residentes",     label: "Residentes",            icon: "groups" },
+  { to: "/porteria",       label: "Portería & Paquetes",   icon: "package_2" },
+  { to: "/reservas",       label: "Reservas Espacios",     icon: "calendar_month" },
+  { to: "/incidentes",     label: "Incidentes & Mant.",    icon: "handyman" },
+  { to: "/mudanzas",       label: "Mudanzas",              icon: "moving" },
+  { to: "/expensas",       label: "Expensas & Cobros",     icon: "payments" },
+  { to: "/timeline",       label: "Bitácora Actividad",    icon: "timeline" },
+  { to: "/vista360",       label: "Vista 360° Unidad",     icon: "view_in_ar",  badge: "Nuevo" },
+  { to: "/notificaciones", label: "Comunicaciones",        icon: "campaign" },
+] as const;
 
-const NAV_ITEMS: NavItem[] = [
-  { key: "dashboard",      label: "Dashboard",          icon: "space_dashboard",  path: "/dashboard" },
-  { key: "directorio",     label: "Directorio Unidades",icon: "domain",           path: "/directorio" },
-  { key: "residentes",     label: "Residentes",         icon: "groups",           path: "/residentes" },
-  { key: "porteria",       label: "Portería & Paquetes",icon: "package_2",        path: "/porteria" },
-  { key: "reservas",       label: "Reservas Espacios",  icon: "calendar_month",   path: "/reservas" },
-  { key: "incidentes",     label: "Incidentes & Mant.", icon: "handyman",         path: "/incidentes" },
-  { key: "mudanzas",       label: "Mudanzas",           icon: "moving",           path: "/mudanzas" },
-  { key: "expensas",       label: "Expensas & Cobros",  icon: "payments",         path: "/expensas" },
-  { key: "timeline",       label: "Bitácora Actividad", icon: "timeline",         path: "/timeline" },
-  { key: "vista360",       label: "Vista 360° Unidad",  icon: "view_in_ar",       path: "/vista360", badge: "Nuevo" },
-  { key: "notificaciones", label: "Comunicaciones",     icon: "campaign",         path: "/notificaciones" },
-];
-
-// Control de acceso por rol
-const ROLE_VIEWS: Record<Role, ViewKey[]> = {
-  ADMIN:    ["dashboard","directorio","residentes","porteria","reservas","incidentes","mudanzas","expensas","timeline","vista360","notificaciones","configuracion"],
-  PORTER:   ["dashboard","porteria","mudanzas","timeline","vista360","notificaciones"],
-  RESIDENT: ["dashboard","vista360","reservas","expensas","timeline","notificaciones"],
+const ROLE_VIEWS: Record<Role, string[]> = {
+  ADMIN:   ["/dashboard", "/directorio", "/residentes", "/porteria", "/reservas", "/incidentes", "/mudanzas", "/expensas", "/timeline", "/vista360", "/notificaciones", "/configuracion"],
+  PORTER:  ["/dashboard", "/porteria", "/mudanzas", "/timeline", "/vista360", "/notificaciones"],
+  RESIDENT:["/dashboard", "/vista360", "/reservas", "/expensas", "/timeline", "/notificaciones"],
 };
 
 const ROLE_LABELS: Record<Role, { label: string; initials: string }> = {
-  ADMIN:    { label: "Administrador", initials: "MG" },
-  PORTER:   { label: "Portería",      initials: "RD" },
-  RESIDENT: { label: "Residente",     initials: "TR" },
+  ADMIN:   { label: "Administrador", initials: "MG" },
+  PORTER:  { label: "Portería",      initials: "RD" },
+  RESIDENT:{ label: "Residente",     initials: "TR" },
 };
 
-// ---- Props ----
-interface SidebarProps {
-  role?: Role;
-  mobileOpen?: boolean;
-  onCloseMobile?: () => void;
-}
+const ROLE_NAMES: Record<Role, string> = {
+  ADMIN: "Martín Guzmán",
+  PORTER: "Roberto Díaz",
+  RESIDENT: "Tomás Rivera",
+};
 
-export function Sidebar({ role = "ADMIN", mobileOpen = false, onCloseMobile }: SidebarProps) {
-  const location = useLocation();
+export function Sidebar() {
+  const { role, mobileNavOpen, setMobileNavOpen } = useApp();
   const allowedViews = ROLE_VIEWS[role];
-  const visibleNav = NAV_ITEMS.filter((item) => allowedViews.includes(item.key));
-  const canConfig = allowedViews.includes("configuracion");
+  const visibleNav = NAV_ITEMS.filter((item) => allowedViews.includes(item.to));
+  const canConfig = allowedViews.includes("/configuracion");
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Poll unread notifications every 30s
+  useEffect(() => {
+    const load = () => {
+      api.notifications({ unread: true })
+        .then((n) => setUnreadCount(n.length))
+        .catch(() => {});
+    };
+    load();
+    const interval = setInterval(load, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>
-      {/* Overlay móvil */}
-      {mobileOpen && (
+      {/* Mobile overlay backdrop */}
+      {mobileNavOpen && (
         <div
           className="fixed inset-0 z-40 md:hidden animate-fade-in"
           style={{ background: "rgba(15,15,20,0.7)", backdropFilter: "blur(4px)" }}
-          onClick={onCloseMobile}
+          onClick={() => setMobileNavOpen(false)}
         />
       )}
 
       <aside
-        className={[
+        className={clsx(
           "fixed left-0 top-0 h-full z-50 flex flex-col justify-between border-r transition-transform duration-300",
           "md:translate-x-0",
-          mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
-        ].join(" ")}
-        style={{ width: "15rem", background: "#0e0e13", borderColor: "rgba(255,255,255,0.06)" }}
+          mobileNavOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        )}
+        style={{
+          width: "15rem",
+          background: "#0e0e13",
+          borderColor: "rgba(255,255,255,0.06)",
+        }}
       >
-        {/* ---- Logo ---- */}
+        {/* Logo */}
         <div className="flex flex-col">
           <div
             className="h-16 px-4 flex items-center justify-between border-b"
@@ -85,61 +95,82 @@ export function Sidebar({ role = "ADMIN", mobileOpen = false, onCloseMobile }: S
               </div>
               <span className="font-semibold tracking-tight text-[16px] text-gradient">CondoTrack</span>
             </div>
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono text-[#c7c4d7] bg-[#2a292f]">OPS</span>
+            <div className="px-1.5 py-0.5 rounded text-[10px] font-mono text-[#c7c4d7] bg-[#2a292f]">
+              OPS
+            </div>
           </div>
 
-          {/* ---- Navegación ---- */}
+          {/* Nav */}
           <div className="px-2 pt-3">
             <div className="px-2 pb-1 text-[11px] uppercase tracking-wider text-[#908fa0] font-semibold">
               Plataforma
             </div>
             <nav className="flex flex-col gap-0.5">
-              {visibleNav.map((item) => {
-                const active = location.pathname === item.path || location.pathname.startsWith(item.path + "/");
-                return (
-                  <NavLink
-                    key={item.key}
-                    to={item.path}
-                    onClick={onCloseMobile}
-                    className={[
-                      "relative flex items-center justify-between px-2 py-2 rounded-lg text-[14px] transition-all duration-150 group w-full text-left no-underline",
-                      active
+              {visibleNav.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setMobileNavOpen(false)}
+                  className={({ isActive }) =>
+                    clsx(
+                      "relative flex items-center justify-between px-2 py-2 rounded-lg text-[14px] transition-all duration-150 group",
+                      isActive
                         ? "bg-brand-gradient text-white font-semibold"
-                        : "text-[#c7c4d7] hover:bg-[#1f1f24] hover:text-[#e4e1e9]",
-                    ].join(" ")}
-                    style={active ? { boxShadow: "0 0 16px -2px rgba(99,102,241,0.35)" } : undefined}
-                  >
-                    {active && (
-                      <span
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-[#4cd7f6] rounded-r"
-                        style={{ boxShadow: "0 0 8px #4cd7f6" }}
-                      />
-                    )}
-                    <div className="flex items-center gap-2">
-                      <Icon
-                        name={item.icon}
-                        className={`text-[18px] transition-transform group-hover:scale-110 ${active ? "text-[#4cd7f6]" : ""}`}
-                        fill={active}
-                      />
-                      <span>{item.label}</span>
-                    </div>
-                    {item.badge && (
-                      <span
-                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase ${
-                          active ? "bg-white/20 text-white" : "bg-[#571bc1] text-[#c4abff]"
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
-                    )}
-                  </NavLink>
-                );
-              })}
+                        : "text-[#c7c4d7] hover:bg-[#1f1f24] hover:text-[#e4e1e9]"
+                    )
+                  }
+                  style={({ isActive }) =>
+                    isActive ? { boxShadow: "0 0 16px -2px rgba(99,102,241,0.35)" } : undefined
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      {isActive && (
+                        <span
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-[#4cd7f6] rounded-r"
+                          style={{ boxShadow: "0 0 8px #4cd7f6" }}
+                        />
+                      )}
+                      <div className="flex items-center gap-2">
+                        <Icon
+                          name={item.icon}
+                          className={clsx("text-[18px] transition-transform group-hover:scale-110", isActive ? "text-[#4cd7f6]" : "")}
+                          fill={isActive}
+                        />
+                        <span>{item.label}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {"badge" in item && item.badge && (
+                          <span
+                            className={clsx(
+                              "px-1.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase",
+                              isActive ? "bg-white/20 text-white" : "bg-[#571bc1] text-[#c4abff]"
+                            )}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
+                        {item.to === "/notificaciones" && unreadCount > 0 && (
+                          <span
+                            className={clsx(
+                              "min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse",
+                              isActive ? "bg-white text-[#6366f1]" : "bg-[#f43f5e] text-white"
+                            )}
+                            style={isActive ? undefined : { boxShadow: "0 0 8px rgba(244,63,94,0.5)" }}
+                          >
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                          </span>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </NavLink>
+              ))}
             </nav>
           </div>
         </div>
 
-        {/* ---- Footer del sidebar ---- */}
+        {/* Footer */}
         <div
           className="px-2 pb-3 flex flex-col gap-2 border-t pt-3"
           style={{ borderColor: "rgba(255,255,255,0.06)" }}
@@ -147,21 +178,25 @@ export function Sidebar({ role = "ADMIN", mobileOpen = false, onCloseMobile }: S
           {canConfig && (
             <NavLink
               to="/configuracion"
-              onClick={onCloseMobile}
+              onClick={() => setMobileNavOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-2 px-2 py-2 rounded-lg text-[14px] transition-all w-full text-left no-underline ${
+                clsx(
+                  "flex items-center gap-2 px-2 py-2 rounded-lg text-[14px] transition-all",
                   isActive
                     ? "bg-[#6366f1]/15 text-[#c0c1ff] font-semibold"
                     : "text-[#c7c4d7] hover:bg-[#1f1f24] hover:text-[#e4e1e9]"
-                }`
+                )
               }
             >
-              <Icon name="settings" className="text-[18px]" />
-              <span>Configuración</span>
+              {({ isActive }) => (
+                <>
+                  <Icon name="settings" className="text-[18px]" fill={isActive} />
+                  <span>Configuración</span>
+                </>
+              )}
             </NavLink>
           )}
 
-          {/* Perfil de usuario */}
           <div
             className="flex items-center gap-2 p-2 rounded-xl border"
             style={{ background: "#1b1b20", borderColor: "rgba(255,255,255,0.06)" }}
@@ -174,7 +209,7 @@ export function Sidebar({ role = "ADMIN", mobileOpen = false, onCloseMobile }: S
             </div>
             <div className="flex flex-col min-w-0 flex-1">
               <span className="text-[12px] font-semibold text-[#e4e1e9] truncate">
-                {role === "RESIDENT" ? "Tomás Rivera" : role === "PORTER" ? "Roberto Díaz" : "Martín Guzmán"}
+                {ROLE_NAMES[role]}
               </span>
               <span className="text-[11px] text-[#c7c4d7] truncate flex items-center gap-1">
                 <span className="w-1 h-1 rounded-full bg-[#c0c1ff]" />
