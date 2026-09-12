@@ -1,0 +1,12 @@
+# Local design models
+modelo1/
+modelo2/
+**/modelo1/
+**/modelo2/
+
+# Environment files
+.env*.local
+
+# OS files
+.DS_Store
+Thumbs.db
