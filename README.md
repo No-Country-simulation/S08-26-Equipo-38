@@ -58,7 +58,7 @@ La API estará disponible en `http://localhost:8080`.
 En una nueva terminal:
 ```bash
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 La aplicación web estará disponible en `http://localhost:5173`.
