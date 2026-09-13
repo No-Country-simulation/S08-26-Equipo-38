@@ -4,6 +4,7 @@ logs
 
 # Local design models (not for version control)
 modelo1/
+modelo2/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

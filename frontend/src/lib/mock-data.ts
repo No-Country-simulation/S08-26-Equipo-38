@@ -62,12 +62,48 @@ export const MOCK_ACCESSES: AccessLog[] = [
 ];
 
 // ── Amenity Spaces ─────────────────────────────────────────────────────────
+// Extended with visual/calendar fields used in the interactive weekly view
 export const MOCK_SPACES: AmenitySpace[] = [
-  { id: "s1", buildingId: "b1", name: "Parrilla Norte", location: "PB - Sector Norte", capacity: 20, hourlyRate: 500, openFrom: "10:00", openTo: "23:00" },
-  { id: "s2", buildingId: "b1", name: "SUM Grande", location: "PB - Ala Este", capacity: 80, hourlyRate: 2000, openFrom: "09:00", openTo: "01:00" },
-  { id: "s3", buildingId: "b1", name: "Gimnasio", location: "Subsuelo", capacity: 15, hourlyRate: 0, openFrom: "06:00", openTo: "22:00" },
-  { id: "s4", buildingId: "b1", name: "Paddle", location: "Terraza - Piso 18", capacity: 4, hourlyRate: 800, openFrom: "08:00", openTo: "21:00" },
-  { id: "s5", buildingId: "b1", name: "Coworking", location: "Piso 2", capacity: 12, hourlyRate: 300, openFrom: "07:00", openTo: "22:00" },
+  {
+    id: "s1", buildingId: "b1", name: "Parrilla Norte", location: "PB - Sector Norte",
+    capacity: 20, hourlyRate: 500, openFrom: "10:00", openTo: "23:00",
+    emoji: "🔥", subtitle: "Parrilla con vista al parque",
+    todayStatus: "Libre", isAvailableToday: true,
+    allowedHours: "10:00 - 23:00", cleaningFee: "$3.500", depositFee: "$10.000",
+    weeklyBookings: 4,
+  },
+  {
+    id: "s2", buildingId: "b1", name: "SUM Grande", location: "PB - Ala Este",
+    capacity: 80, hourlyRate: 2000, openFrom: "09:00", openTo: "01:00",
+    emoji: "🎉", subtitle: "Salón de usos múltiples con cocina",
+    todayStatus: "Ocupado hasta 01:00", isAvailableToday: false,
+    allowedHours: "09:00 - 01:00", cleaningFee: "$12.000", depositFee: "$30.000",
+    weeklyBookings: 2,
+  },
+  {
+    id: "s3", buildingId: "b1", name: "Gimnasio", location: "Subsuelo",
+    capacity: 15, hourlyRate: 0, openFrom: "06:00", openTo: "22:00",
+    emoji: "💪", subtitle: "Equipamiento completo · Sin cargo",
+    todayStatus: "Libre", isAvailableToday: true,
+    allowedHours: "06:00 - 22:00", cleaningFee: "—", depositFee: "—",
+    weeklyBookings: 12,
+  },
+  {
+    id: "s4", buildingId: "b1", name: "Paddle", location: "Terraza - Piso 18",
+    capacity: 4, hourlyRate: 800, openFrom: "08:00", openTo: "21:00",
+    emoji: "🎾", subtitle: "Cancha techada con iluminación",
+    todayStatus: "Libre", isAvailableToday: true,
+    allowedHours: "08:00 - 21:00", cleaningFee: "—", depositFee: "$5.000",
+    weeklyBookings: 3,
+  },
+  {
+    id: "s5", buildingId: "b1", name: "Coworking", location: "Piso 2",
+    capacity: 12, hourlyRate: 300, openFrom: "07:00", openTo: "22:00",
+    emoji: "💼", subtitle: "Sala silenciosa · WiFi dedicado",
+    todayStatus: "Libre", isAvailableToday: true,
+    allowedHours: "07:00 - 22:00", cleaningFee: "—", depositFee: "—",
+    weeklyBookings: 8,
+  },
 ];
 
 // ── Reservations ───────────────────────────────────────────────────────────
@@ -84,12 +120,12 @@ export const MOCK_RESERVATIONS: Reservation[] = [
 
 // ── Incidents ──────────────────────────────────────────────────────────────
 export const MOCK_INCIDENTS: Incident[] = [
-  { id: "i1", unitId: "u1", code: 1001, type: "MAINTENANCE", title: "Goteo en baño principal", description: "Pérdida de agua en cañería bajo mesada del baño. Se escucha goteo constante.", priority: "HIGH", status: "OPEN", slaHours: 24, createdAt: daysAgo(1), updatedAt: daysAgo(1), unit: { code: "1A", label: "1A - T.A", tower: "Torre A", floor: 1 } },
-  { id: "i2", unitId: "u3", code: 1002, type: "INCIDENT", title: "Cortocircuito en cocina", description: "Chispas al enchufar electrodomésticos. Hay olor a quemado.", priority: "URGENT", status: "IN_PROGRESS", assignedTo: "Electricista García", slaHours: 4, createdAt: daysAgo(0.5), updatedAt: daysAgo(0.2), unit: { code: "5C", label: "5C - T.B", tower: "Torre B", floor: 5 } },
+  { id: "i1", unitId: "u1", code: 1001, type: "MAINTENANCE", title: "Goteo en baño principal", description: "Pérdida de agua en cañería bajo mesada del baño. Se escucha goteo constante.", priority: "HIGH", status: "OPEN", slaHours: 24, slaRemaining: "SLA: 18h restantes", createdAt: daysAgo(1), updatedAt: daysAgo(1), unit: { code: "1A", label: "1A - T.A", tower: "Torre A", floor: 1 } },
+  { id: "i2", unitId: "u3", code: 1002, type: "INCIDENT", title: "Cortocircuito en cocina", description: "Chispas al enchufar electrodomésticos. Hay olor a quemado.", priority: "URGENT", status: "IN_PROGRESS", assignedTo: "Electricista García", slaHours: 4, slaRemaining: "SLA: 1h restante", progressPercent: 65, createdAt: daysAgo(0.5), updatedAt: daysAgo(0.2), unit: { code: "5C", label: "5C - T.B", tower: "Torre B", floor: 5 } },
   { id: "i3", unitId: "u3", code: 1003, type: "COMPLAINT", title: "Ruidos molestos desde piso 6", description: "Música alta y golpes constantes desde las 22hs.", priority: "NORMAL", status: "OPEN", slaHours: 48, createdAt: daysAgo(2), updatedAt: daysAgo(2), unit: { code: "5C", label: "5C - T.B", tower: "Torre B", floor: 5 } },
-  { id: "i4", unitId: "u5", code: 1004, type: "MAINTENANCE", title: "Puerta del balcón no cierra", description: "El herraje está roto, no cierra correctamente.", priority: "HIGH", status: "OPEN", slaHours: 24, createdAt: daysAgo(3), updatedAt: daysAgo(3), unit: { code: "10B", label: "10B - T.B", tower: "Torre B", floor: 10 } },
+  { id: "i4", unitId: "u5", code: 1004, type: "MAINTENANCE", title: "Puerta del balcón no cierra", description: "El herraje está roto, no cierra correctamente.", priority: "HIGH", status: "OPEN", slaHours: 24, slaRemaining: "SLA: 6h restantes", createdAt: daysAgo(3), updatedAt: daysAgo(3), unit: { code: "10B", label: "10B - T.B", tower: "Torre B", floor: 10 } },
   { id: "i5", unitId: "u2", code: 1005, type: "MAINTENANCE", title: "Aire acondicionado sin frío", description: "El equipo enciende pero no enfría.", priority: "NORMAL", status: "RESOLVED", assignedTo: "Técnico Frío", slaHours: 48, resolvedAt: daysAgo(1), createdAt: daysAgo(5), updatedAt: daysAgo(1), unit: { code: "2B", label: "2B - T.A", tower: "Torre A", floor: 2 } },
-  { id: "i6", unitId: "u4", code: 1006, type: "INCIDENT", title: "Filtración en techo", description: "Mancha de humedad visible en el techo del living.", priority: "URGENT", status: "IN_PROGRESS", assignedTo: "Albañil Rodríguez", slaHours: 8, createdAt: daysAgo(0.3), updatedAt: daysAgo(0.1), unit: { code: "8A", label: "8A - T.A", tower: "Torre A", floor: 8 } },
+  { id: "i6", unitId: "u4", code: 1006, type: "INCIDENT", title: "Filtración en techo", description: "Mancha de humedad visible en el techo del living.", priority: "URGENT", status: "IN_PROGRESS", assignedTo: "Albañil Rodríguez", slaHours: 8, slaRemaining: "SLA: 2h restantes", progressPercent: 40, createdAt: daysAgo(0.3), updatedAt: daysAgo(0.1), unit: { code: "8A", label: "8A - T.A", tower: "Torre A", floor: 8 } },
   { id: "i7", unitId: "u7", code: 1007, type: "MAINTENANCE", title: "Persiana trabada", description: "La persiana del dormitorio principal no sube.", priority: "LOW", status: "CLOSED", slaHours: 72, resolvedAt: daysAgo(7), createdAt: daysAgo(14), updatedAt: daysAgo(7), unit: { code: "15C", label: "15C - T.C", tower: "Torre C", floor: 15 } },
 ];
 

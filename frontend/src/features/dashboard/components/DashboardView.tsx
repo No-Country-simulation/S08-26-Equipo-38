@@ -79,6 +79,14 @@ export function DashboardView() {
             </p>
           </div>
           <div className="flex flex-col gap-2 min-w-[18rem]">
+            {/* Indicador de conexión pulsante */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full w-fit" style={{ background: "#1b1b20", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: "#4cd7f6" }} />
+                <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: "#4cd7f6" }} />
+              </span>
+              <span className="text-[12px] font-medium text-[#e4e1e9]">Recepción Conectada</span>
+            </div>
             <div className="flex items-center justify-between gap-2 p-3 rounded-lg" style={{ background: "#35343a" }}>
               <div className="flex items-center gap-2">
                 <Icon name="domain" className="text-[20px] text-[#c0c1ff]" />
@@ -96,31 +104,72 @@ export function DashboardView() {
         </div>
       </div>
 
-      {/* Quick actions — role-aware */}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[11px] uppercase tracking-wider text-[#908fa0] font-semibold mr-1">Accesos rápidos:</span>
-        {role === "ADMIN" && (
-          <>
-            <QuickAction icon="add_alert" label="Reportar incidente" color="#fbbf24" bg="rgba(251,191,36,0.12)" onClick={() => navigate("/incidentes")} />
-            <QuickAction icon="inventory" label="Registrar paquete" color="#c0c1ff" bg="rgba(192,193,255,0.12)" onClick={() => navigate("/porteria")} />
-            <QuickAction icon="campaign" label="Enviar aviso" color="#4cd7f6" bg="rgba(76,215,246,0.12)" onClick={() => navigate("/notificaciones")} />
-            <QuickAction icon="moving" label="Solicitud mudanza" color="#fbbf24" bg="rgba(251,191,36,0.12)" onClick={() => navigate("/mudanzas")} />
-          </>
-        )}
-        {role === "PORTER" && (
-          <>
-            <QuickAction icon="inventory" label="Registrar paquete" color="#c0c1ff" bg="rgba(192,193,255,0.12)" onClick={() => navigate("/porteria")} />
-            <QuickAction icon="campaign" label="Enviar aviso" color="#4cd7f6" bg="rgba(76,215,246,0.12)" onClick={() => navigate("/notificaciones")} />
-            <QuickAction icon="moving" label="Solicitud mudanza" color="#fbbf24" bg="rgba(251,191,36,0.12)" onClick={() => navigate("/mudanzas")} />
-          </>
-        )}
-        {role === "RESIDENT" && (
-          <>
-            <QuickAction icon="calendar_add_on" label="Nueva reserva" color="#d0bcff" bg="rgba(208,188,255,0.12)" onClick={() => navigate("/reservas")} />
-            <QuickAction icon="payments" label="Ver mis expensas" color="#34d399" bg="rgba(52,211,153,0.12)" onClick={() => navigate("/expensas")} />
-            <QuickAction icon="view_in_ar" label="Mi unidad" color="#c0c1ff" bg="rgba(192,193,255,0.12)" onClick={() => navigate("/vista360")} />
-          </>
-        )}
+      {/* Acciones Rápidas + Telemetría */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Grid 2x2 de acciones rápidas */}
+        <div className="lg:col-span-2 rounded-xl p-4" style={{ background: "#1b1b20", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="flex items-center gap-2 mb-3">
+            <Icon name="bolt" className="text-[20px] text-[#4cd7f6]" fill />
+            <h2 className="text-[14px] font-semibold text-[#e4e1e9]">Acciones Rápidas</h2>
+            <span className="text-[11px] text-[#908fa0] ml-1">Operaciones prioritarias de portería y conserjería</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            {role === "ADMIN" && (
+              <>
+                <QuickActionCard icon="add_alert" label="Reportar Incidente" sub="Crear ticket SLA" color="#fbbf24" bg="rgba(251,191,36,0.12)" onClick={() => navigate("/incidentes")} />
+                <QuickActionCard icon="inventory" label="Registrar Paquete" sub="Escanear código" color="#c0c1ff" bg="rgba(192,193,255,0.12)" onClick={() => navigate("/porteria")} />
+                <QuickActionCard icon="campaign" label="Enviar Aviso" sub="Comunicado masivo" color="#4cd7f6" bg="rgba(76,215,246,0.12)" onClick={() => navigate("/notificaciones")} />
+                <QuickActionCard icon="moving" label="Solicitud Mudanza" sub="Nuevo ingreso/egreso" color="#fbbf24" bg="rgba(251,191,36,0.12)" onClick={() => navigate("/mudanzas")} />
+              </>
+            )}
+            {role === "PORTER" && (
+              <>
+                <QuickActionCard icon="inventory" label="Registrar Paquete" sub="Escanear código" color="#c0c1ff" bg="rgba(192,193,255,0.12)" onClick={() => navigate("/porteria")} />
+                <QuickActionCard icon="person_add" label="Registrar Visita" sub="Ingreso & DNI" color="#4cd7f6" bg="rgba(76,215,246,0.12)" onClick={() => navigate("/porteria")} />
+                <QuickActionCard icon="campaign" label="Enviar Aviso" sub="Comunicado" color="#c0c1ff" bg="rgba(192,193,255,0.12)" onClick={() => navigate("/notificaciones")} />
+                <QuickActionCard icon="moving" label="Ver Mudanzas" sub="Pendientes" color="#fbbf24" bg="rgba(251,191,36,0.12)" onClick={() => navigate("/mudanzas")} />
+              </>
+            )}
+            {role === "RESIDENT" && (
+              <>
+                <QuickActionCard icon="calendar_add_on" label="Nueva Reserva" sub="SUM o Parrilla" color="#d0bcff" bg="rgba(208,188,255,0.12)" onClick={() => navigate("/reservas")} />
+                <QuickActionCard icon="payments" label="Mis Expensas" sub="Ver liquidación" color="#34d399" bg="rgba(52,211,153,0.12)" onClick={() => navigate("/expensas")} />
+                <QuickActionCard icon="view_in_ar" label="Mi Unidad" sub="Vista 360°" color="#c0c1ff" bg="rgba(192,193,255,0.12)" onClick={() => navigate("/vista360")} />
+                <QuickActionCard icon="campaign" label="Notificaciones" sub="Mis avisos" color="#4cd7f6" bg="rgba(76,215,246,0.12)" onClick={() => navigate("/notificaciones")} />
+              </>
+            )}
+          </div>
+        </div>
+        {/* Bloque de telemetría */}
+        <div className="rounded-xl p-4 flex flex-col gap-3" style={{ background: "#1b1b20", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="flex items-center justify-between">
+            <span className="text-[13px] font-semibold text-[#e4e1e9] flex items-center gap-1.5">
+              <Icon name="videocam" className="text-[18px] text-[#4cd7f6]" />
+              Cámaras & Portón
+            </span>
+            <span className="text-[11px] font-mono font-bold text-[#4cd7f6] px-2 py-0.5 rounded" style={{ background: "rgba(6,182,212,0.15)" }}>100% OK</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-[11px] rounded-xl p-3" style={{ background: "#131318" }}>
+            {[
+              { label: "Circuito Cerrado", val: "32/32 Online", color: "#4cd7f6" },
+              { label: "Barrera Vehicular", val: "Portón Norte OK", color: "#34d399" },
+              { label: "Control de Acceso", val: "Activo", color: "#4cd7f6" },
+              { label: "Intercomunicador", val: "Operativo", color: "#34d399" },
+            ].map(({ label, val, color }) => (
+              <div key={label}>
+                <div className="text-[#908fa0] text-[10px]">{label}</div>
+                <div className="font-semibold" style={{ color }}>{val}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center gap-1.5 text-[11px] text-[#908fa0] px-2 py-1.5 rounded-lg" style={{ background: "rgba(14,14,19,0.6)" }}>
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-[#4cd7f6]" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#4cd7f6]" />
+            </span>
+            <span>Monitoreo continuo activo</span>
+          </div>
+        </div>
       </div>
 
       {/* KPIs */}
@@ -414,6 +463,25 @@ function QuickAction({ icon, label, color, bg, onClick }: { icon: string; label:
     </button>
   );
 }
+
+function QuickActionCard({ icon, label, sub, color, bg, onClick }: { icon: string; label: string; sub: string; color: string; bg: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="group flex flex-col items-start gap-2 p-3 rounded-xl border text-left transition-all hover:-translate-y-0.5 hover:border-[rgba(255,255,255,0.15)] hover:shadow-lg cursor-pointer"
+      style={{ background: "#131318", borderColor: "rgba(255,255,255,0.06)" }}
+    >
+      <div className="p-2 rounded-xl transition-transform group-hover:scale-110" style={{ background: bg }}>
+        <Icon name={icon} className="text-[22px]" style={{ color }} fill />
+      </div>
+      <div className="flex flex-col">
+        <span className="text-[12px] font-semibold text-[#e4e1e9] leading-tight">{label}</span>
+        <span className="text-[10px] text-[#908fa0] mt-0.5">{sub}</span>
+      </div>
+    </button>
+  );
+}
+
 
 function MiniWidget({ icon, iconColor, iconBg, label, value, sub, onClick }: { icon: string; iconColor: string; iconBg: string; label: string; value: React.ReactNode; sub: string; onClick: () => void }) {
   return (

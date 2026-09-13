@@ -87,7 +87,17 @@ export interface AmenitySpace {
   openFrom: string;
   openTo: string;
   _count?: { reservations: number };
+  // Visual/calendar extras (enriched in mock, omitted by backend)
+  emoji?: string;
+  subtitle?: string;
+  todayStatus?: string;
+  isAvailableToday?: boolean;
+  allowedHours?: string;
+  cleaningFee?: string;
+  depositFee?: string;
+  weeklyBookings?: number;
 }
+
 
 export interface Reservation {
   id: string;
@@ -119,8 +129,13 @@ export interface Incident {
   resolvedAt?: string | null;
   createdAt: string;
   updatedAt: string;
+  // Visual extras (from modelo2 — not stored in backend, enriched locally)
+  progressPercent?: number;
+  imageUrl?: string | null;
+  slaRemaining?: string | null;
   unit?: { code: string; label: string; tower: string; floor: number; building?: { shortName: string } };
 }
+
 
 export interface MoveRequest {
   id: string;
